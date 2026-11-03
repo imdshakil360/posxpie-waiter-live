@@ -15,6 +15,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REF: ${{ github.ref_name }}
         run: |
+          set +e
           body="{\"source\":{\"branch\":\"$REF\",\"path\":\"/docs\"}}"
           mkdir -p debug
           {
@@ -36,9 +37,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          jq -n --rawfile body debug/pages-api.txt \
-            '{title: "Pages setup diagnostic", body: $body}' \
-            | gh api -X POST "repos/$GITHUB_REPOSITORY/issues" --input - --jq '.html_url'
+          jq -n --rawfile body debug/pages-api.txt '{body: $body}' \
+            | gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/1" --input - --jq '.html_url'
       - name: Fail if Pages is still missing
         env:
           GH_TOKEN: ${{ github.token }}
