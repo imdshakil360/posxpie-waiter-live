@@ -1,0 +1,32 @@
+name: Enable GitHub Pages
+
+# One-shot helper: configures this repository's Pages site to serve the
+# prebuilt static app committed in docs/. Run it with:
+#   gh workflow run enable-pages.yml --ref arena/6d7712ec-posxpie-waiter-live
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+
+jobs:
+  enable-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Point Pages at docs/ on this branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REF: ${{ github.ref_name }}
+        run: |
+          body="{\"source\":{\"branch\":\"$REF\",\"path\":\"/docs\"}}"
+          if gh api "repos/$GITHUB_REPOSITORY/pages" >/dev/null 2>&1; then
+            echo "Pages site already exists; updating its source."
+            printf '%s' "$body" | gh api -X PUT "repos/$GITHUB_REPOSITORY/pages" \
+              -H 'Accept: application/vnd.github+json' --input -
+          else
+            echo "Creating Pages site."
+            printf '%s' "$body" | gh api -X POST "repos/$GITHUB_REPOSITORY/pages" \
+              -H 'Accept: application/vnd.github+json' --input -
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/pages" --jq '.html_url, .status, .source'
