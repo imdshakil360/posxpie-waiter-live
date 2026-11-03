@@ -2,9 +2,6 @@ name: Enable GitHub Pages
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - arena/6d7712ec-posxpie-waiter-live
 
 permissions: write-all
 
@@ -13,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Point Pages at docs/ on this branch
-        id: setup
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -36,11 +32,10 @@ jobs:
             echo "--- final site ---"
             gh api "repos/$GITHUB_REPOSITORY/pages" 2>&1
           } | tee debug/pages-api.txt
-      - name: Save debug output
-        uses: actions/upload-artifact@v4
-        with:
-          name: pages-debug
-          path: debug/pages-api.txt
+      - name: Publish diagnostics
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue create --title "Pages setup diagnostic" --body-file debug/pages-api.txt
       - name: Fail if Pages is still missing
         env:
           GH_TOKEN: ${{ github.token }}
