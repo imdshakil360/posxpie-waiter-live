@@ -35,7 +35,10 @@ jobs:
       - name: Publish diagnostics
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh issue create --title "Pages setup diagnostic" --body-file debug/pages-api.txt
+        run: |
+          jq -n --rawfile body debug/pages-api.txt \
+            '{title: "Pages setup diagnostic", body: $body}' \
+            | gh api -X POST "repos/$GITHUB_REPOSITORY/issues" --input - --jq '.html_url'
       - name: Fail if Pages is still missing
         env:
           GH_TOKEN: ${{ github.token }}
