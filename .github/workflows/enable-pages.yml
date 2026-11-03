@@ -5,6 +5,9 @@ name: Enable GitHub Pages
 #   gh workflow run enable-pages.yml --ref arena/6d7712ec-posxpie-waiter-live
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - arena/6d7712ec-posxpie-waiter-live
 
 permissions:
   contents: read
